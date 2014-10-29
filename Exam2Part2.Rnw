@@ -1,0 +1,76 @@
+\documentclass{article}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+<<echo=FALSE, results=hide>>=
+read_url <- url("http://www.itk.ilstu.edu/faculty/jrwolf/spendingdata.txt")
+data     <- readLines(read_url, skip = 500)
+data_table <- data[32:34]
+head(data_table)
+
+new.text.1 <- gsub(pattern = ",",
+                   replacement = " ",
+                   x = data_table,
+                   ignore.case = TRUE,
+                   perl = FALSE,
+                   fixed = FALSE,
+                   useBytes = FALSE)
+head(new.text.1)     
+
+new.text.2 <- gsub(pattern = "Average Number of Purchases",
+                   replacement = "Average_Number_of_Purchases",
+                   x = new.text.1,
+                   ignore.case = TRUE,
+                   perl = FALSE,
+                   fixed = FALSE,
+                   useBytes = FALSE)
+                   
+new.text.3 <- gsub(pattern = "Average Transaction Value",
+                   replacement = "Average_Transaction_Value",
+                   x = new.text.2,
+                   ignore.case = TRUE,
+                   perl = FALSE,
+                   fixed = FALSE,
+                   useBytes = FALSE)
+
+head(new.text.3)
+
+data.list<-strsplit(new.text.3, " ") 
+head(data.list)
+
+data.mat<-do.call(rbind,data.list)
+
+head(data.mat)
+data.new <- as.data.frame(data.mat[2:3,])
+head(data.new)
+library(plyr)
+data.new <- rename(data.new, c("V1"="Type", "V2"="Cash", "V3"="Check","V4"="Credit","V5"="Debit","V6"="Electronic","V7"="Other","V8"="Total"))
+head(data.new)
+data.new.1 <- data.new[1,]
+head(data.new.1)
+str(data.new.1)
+data.new.1$Cash<-as.numeric(as.character(data.new.1$Cash))
+data.new.1$Check<-as.numeric(as.character(data.new.1$Check))
+data.new.1$Credit<-as.numeric(as.character(data.new.1$Credit))
+data.new.1$Debit<-as.numeric(as.character(data.new.1$Debit))
+data.new.1$Electronic<-as.numeric(as.character(data.new.1$Electronic))
+data.new.1$Other<-as.numeric(as.character(data.new.1$Other))
+data.new.1$Total<-as.numeric(as.character(data.new.1$Total))
+str(data.new.1)
+
+head(data.new.1)
+data_table_2 <-  data.new[-2]
+head(data_table_2)
+x<-round(((data.new.1$Other[1])/(data.new.1$Total[1]))*100)
+head(x)
+str(data.new)
+summary(data.new.1)
+
+@
+\section{Cash is the most used retail payment instrument.}
+In October 2012, the average American consumer had \Sexpr{round(data.new.1$Total[1])} transactions, including purchases and bill payments, and  \Sexpr{floor(data.new.1$Cash[1])} of these \Sexpr{round(data.new.1$Total[1])}. At \Sexpr{floor((round(data.new.1$Cash[1])/round(data.new.1$Total[1]))*100)}  percent, cash makes up the single largest share of consumer transaction activity, followed by debit cards at \Sexpr{round(((data.new.1$Debit[1])/(data.new.1$Total[1]))*100)} percent, and credit cards at \Sexpr{round(((data.new.1$Credit[1])/(data.new.1$Total[1]))*100)} percent. Electronic methods (online banking bill pay and bank account number payments) account for \Sexpr{round(((data.new.1$Electronic[1])/(data.new.1$Total[1]))*100)} percent, while checks make up \Sexpr{round(((data.new.1$Check[1])/(data.new.1$Total[1]))*100)} percent.All other payments represent less than \Sexpr{round(((data.new.1$Other[1])/(data.new.1$Total[1]))*100)} percent of monthly transaction activity, with text and mobile payments barely registering at less than one half of one percent. 
+
+
+
+\end{document}
